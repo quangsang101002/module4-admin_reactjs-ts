@@ -1,11 +1,12 @@
 import { Button } from "react-bootstrap";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./ProductAdd.module.scss";
 import clsx from "clsx";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import productAPI from "../../../../apis/products/products.api";
+import { BodyProduct } from "../../../../apis/products/products.interFace.api";
 
 function ProductAdd(): JSX.Element {
   const [code, setCode] = useState<string>("");
@@ -13,27 +14,58 @@ function ProductAdd(): JSX.Element {
   const [price, setPrice] = useState<number>(0);
   const [author, setAuthor] = useState<string>("");
   const [classify, setClassify] = useState<string>("");
-  const [validate, setValidate] = useState<string>("");
+  const [dataChanged, setDataChanged] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [avatar, setAvatar] = useState<File | null>(null);
-
   const [gallery, setGallery] = useState<File[] | null>([]);
+  const [number, setNumber] = useState<string>("");
+  const [validate, setValidate] = useState<{ [key: string]: string }>({});
+  console.log(validate);
+
+  useEffect(() => {
+    setDataChanged(true);
+  }, [code, nameProduct, price, author, classify, avatar, gallery]);
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", confirmExit);
+    return () => {
+      window.removeEventListener("beforeunload", confirmExit);
+    };
+  }, [dataChanged]);
+
+  function confirmExit(e: BeforeUnloadEvent) {
+    if (dataChanged) {
+      e.preventDefault();
+      e.returnValue = "Bạn có chắc muốn rời khỏi trang này?";
+    }
+  }
 
   const handleSave = async () => {
-    // const allProduct = {
-    //   sku: code,
-    //   name: nameProduct,
-    //   category: classify,
-    //   author: author,
-    //   unit_price: price,
-    //   avatar: avatar,
-    //   gallery: gallery, // Đảm bảo gallery là một mảng
-    // };
-    // try {
-    //   await productAPI.addProduct(allProduct);
-    // } catch (error) {
-    //   setShow(true);
-    // }
+    const formData = new FormData();
+    // Thêm các trường dữ liệu sản phẩm vào formData
+    formData.append("sku", code);
+    formData.append("name", nameProduct);
+    formData.append("category", classify);
+    formData.append("description", author);
+    formData.append("unit_price", price.toString());
+
+    // Kiểm tra xem avatar và gallery có giá trị trước khi thêm vào formData
+    if (avatar) {
+      formData.append("avatar", avatar);
+    }
+
+    if (gallery) {
+      for (let img of gallery) {
+        formData.append("gallery", img);
+      }
+    }
+
+    try {
+      // Gửi bodyProduct tới API để thêm sản phẩm
+      await productAPI.addProduct(formData);
+    } catch (error) {
+      setShow(true);
+    }
   };
 
   const getClassify = (event: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -42,17 +74,15 @@ function ProductAdd(): JSX.Element {
 
   const handlePrice = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const inputValue = event.target.value;
-    const numericValue = parseFloat(inputValue); // Chuyển chuỗi thành số
+    const numericValue = inputValue.replace(/,/, ""); // Chuyển chuỗi thành số
 
-    setPrice(numericValue); // Lưu dưới dạng số
+    setPrice(parseInt(numericValue)); // Lưu dưới dạng số
+    console.log(numericValue);
+
+    setNumber(new Intl.NumberFormat().format(Number(numericValue) || 0));
   };
 
   // Để hiển thị giá trị đã định dạng trong giao diện người dùng, bạn có thể sử dụng formattedPrice:
-
-  const formattedPrice = price.toLocaleString("vi-VN", {
-    style: "decimal",
-  });
-  console.log(formattedPrice);
 
   // Và sau đó sử dụng `formattedPrice` để hiển thị giá trị trong JSX.
 
@@ -91,10 +121,36 @@ function ProductAdd(): JSX.Element {
     }
   };
 
+  const handleSaveInfo = () => {
+    const validateError = validateName();
+    if (validateError.size === 0) {
+      setShow(false);
+      handleSave();
+      setValidate({ someKey: "" });
+    } else {
+      setValidate(Object.fromEntries(validateError));
+
+      return;
+    }
+  };
+
+  const validateName = () => {
+    let error = new Map<string, string>();
+
+    if (typeof code !== "string" || code.length === 0) {
+      error.set("sku", "Mã sản phẩm không được bỏ trống");
+    } else if (typeof nameProduct !== "string" || nameProduct.length === 0) {
+      error.set("nameProduct", "Tên sản phẩm không được bỏ trống");
+    } else if (typeof price !== "number" || price.toString().length === 0) {
+      error.set("price", "Đơn giá không được bỏ trống");
+    }
+
+    return error;
+  };
+
   return (
     <div className={clsx(styles.wrapper, "row")}>
       <div className={clsx(styles.wrapper_content_left, "col-6")}>
-        <h2>{formattedPrice}</h2>
         <form method="post">
           <Form.Group
             as={Row}
@@ -110,9 +166,7 @@ function ProductAdd(): JSX.Element {
               />
             </Col>
             <small className="text-center" style={{ color: "red" }}>
-              {/* {validate.sku}
-                    {errorDisplay.messageSku}
-                    {errorDisplay.sku} */}
+              {validate.sku}
             </small>
           </Form.Group>
 
@@ -130,11 +184,6 @@ function ProductAdd(): JSX.Element {
                 onChange={(event) => setAuthor(event.target.value)}
               />
             </Col>
-            <small className="text-center" style={{ color: "red" }}>
-              {/* {validate.nameProduct}
-                    {errorDisplay.messageName}
-                    {errorDisplay.nameProduct} */}
-            </small>
           </Form.Group>
 
           <Form.Group
@@ -146,11 +195,15 @@ function ProductAdd(): JSX.Element {
               <Form.Control
                 type="text"
                 // as="textarea"
+                name="text"
                 placeholder="Tên sách"
                 value={nameProduct}
                 onChange={(event) => setNameProduct(event.target.value)}
               />
             </Col>
+            <small className="text-center" style={{ color: "red" }}>
+              {validate.nameProduct}
+            </small>
           </Form.Group>
 
           <Form.Group
@@ -160,9 +213,10 @@ function ProductAdd(): JSX.Element {
           >
             <Col sm="10">
               <Form.Control
+                maxLength={9}
                 type="text"
                 placeholder="Đơn giá"
-                value={price || 0}
+                value={number}
                 onChange={handlePrice}
               />
             </Col>
@@ -176,7 +230,7 @@ function ProductAdd(): JSX.Element {
                 onChange={(event) => getClassify(event)}
                 value={classify}
               >
-                <option disabled hidden value="0">
+                <option disabled hidden value="">
                   Thể loại
                 </option>
                 <option value="1">Sách thiếu nhi</option>
@@ -198,7 +252,7 @@ function ProductAdd(): JSX.Element {
               Tải ảnh mô tả
             </Button>
           </div>
-          <Button className={clsx(styles.btn_save)} onClick={handleSave}>
+          <Button className={clsx(styles.btn_save)} onClick={handleSaveInfo}>
             Lưu
           </Button>
         </form>

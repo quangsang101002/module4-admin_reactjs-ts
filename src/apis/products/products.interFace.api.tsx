@@ -2,7 +2,7 @@ export interface BodyProduct {
   sku: string;
   name: string;
   category: string;
-  author: string;
+  description: string;
   unit_price: number;
   avatar: File | string;
   gallery: (File | string)[];
