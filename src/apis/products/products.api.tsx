@@ -15,8 +15,6 @@ const ShowProduct = async (name: string, limit: number, page: number) => {
       params: params,
     });
 
-    console.log("response ", response);
-
     return response.data;
   } catch (error) {
     console.error("API Error", error);
@@ -24,7 +22,6 @@ const ShowProduct = async (name: string, limit: number, page: number) => {
   }
 };
 const addProduct = async (bodyProducts: FormData) => {
-  console.log("bodyProducts", bodyProducts);
   const accessToken = getAccessToken();
   if (accessToken !== null) {
     const param: LoginResponse = {
@@ -40,9 +37,65 @@ const addProduct = async (bodyProducts: FormData) => {
     }
   }
 };
+const updateProduct = async (id: any, bodyProducts: FormData) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param: LoginResponse = {
+      token: accessToken,
+    };
+
+    return await api
+      .put(`/product/${id}`, bodyProducts, {
+        params: param,
+      })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error("API Error", error);
+        throw error;
+      });
+  }
+};
+
+const deleteProduct = async (id: any) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param: LoginResponse = {
+      token: accessToken,
+    };
+    return await api
+      .delete(`/product/${id}`, { params: param })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error("API Error", error);
+        throw error;
+      });
+  }
+};
+
+const getProductDetail = async (id: any) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param: LoginResponse = {
+      token: accessToken,
+    };
+    try {
+      const response = await api.get(`/product/${id}`, { params: param });
+      return response.data.result;
+    } catch (error: any) {
+      return Promise.reject(error.response.data.error);
+    }
+  }
+};
 const productAPI = {
   ShowProduct,
   addProduct,
+  updateProduct,
+  deleteProduct,
+  getProductDetail,
 };
 
 export default productAPI;

@@ -6,7 +6,8 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import productAPI from "../../../../apis/products/products.api";
-import { BodyProduct } from "../../../../apis/products/products.interFace.api";
+import { Local } from "../../../../utilities/number.util";
+import { useDropzone } from "react-dropzone";
 
 function ProductAdd(): JSX.Element {
   const [code, setCode] = useState<string>("");
@@ -20,7 +21,25 @@ function ProductAdd(): JSX.Element {
   const [gallery, setGallery] = useState<File[] | null>([]);
   const [number, setNumber] = useState<string>("");
   const [validate, setValidate] = useState<{ [key: string]: string }>({});
-  console.log(validate);
+  const [productPreview, setproductPreview] = useState<Product[]>([]);
+  const [base64Image, setBase64Image] = useState<string>("");
+  const [base64Images, setBase64Images] = useState<string[]>([]);
+
+  console.log("base64Images", base64Images);
+
+  interface Product {
+    category: number;
+    created_at: string;
+    created_by_id: number;
+    description: string;
+    image: string;
+    name: string;
+    product_id: number;
+    sku: string;
+    unit_price: number;
+    updated_at: string;
+    updated_by_id: number;
+  }
 
   useEffect(() => {
     setDataChanged(true);
@@ -28,8 +47,13 @@ function ProductAdd(): JSX.Element {
 
   useEffect(() => {
     window.addEventListener("beforeunload", confirmExit);
+    window.addEventListener("unload", handleUnload);
+    window.addEventListener("popstate", () => {
+      console.log(1);
+    });
     return () => {
       window.removeEventListener("beforeunload", confirmExit);
+      window.removeEventListener("unload", handleUnload);
     };
   }, [dataChanged]);
 
@@ -40,7 +64,15 @@ function ProductAdd(): JSX.Element {
     }
   }
 
-  const handleSave = async () => {
+  function handleUnload(e: BeforeUnloadEvent) {
+    if (dataChanged) {
+      e.preventDefault();
+      // handleDelete();
+      e.returnValue = "Bạn có chắc muốn rời khỏi trang này?";
+    }
+  }
+
+  const handleAdd = async () => {
     const formData = new FormData();
     // Thêm các trường dữ liệu sản phẩm vào formData
     formData.append("sku", code);
@@ -53,7 +85,6 @@ function ProductAdd(): JSX.Element {
     if (avatar) {
       formData.append("avatar", avatar);
     }
-
     if (gallery) {
       for (let img of gallery) {
         formData.append("gallery", img);
@@ -81,10 +112,6 @@ function ProductAdd(): JSX.Element {
 
     setNumber(new Intl.NumberFormat().format(Number(numericValue) || 0));
   };
-
-  // Để hiển thị giá trị đã định dạng trong giao diện người dùng, bạn có thể sử dụng formattedPrice:
-
-  // Và sau đó sử dụng `formattedPrice` để hiển thị giá trị trong JSX.
 
   const uploadAvatarImage = () => {
     const fileInput = document.createElement("input");
@@ -121,11 +148,11 @@ function ProductAdd(): JSX.Element {
     }
   };
 
-  const handleSaveInfo = () => {
+  const handleSubmit = () => {
     const validateError = validateName();
     if (validateError.size === 0) {
       setShow(false);
-      handleSave();
+      handleAdd();
       setValidate({ someKey: "" });
     } else {
       setValidate(Object.fromEntries(validateError));
@@ -148,6 +175,28 @@ function ProductAdd(): JSX.Element {
     return error;
   };
 
+  const onDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64Data: string = reader.result as string;
+      setBase64Image(base64Data);
+    };
+    reader.readAsDataURL(file);
+
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Data = reader.result as string;
+        setBase64Images((prevImages) => [...prevImages, base64Data]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   return (
     <div className={clsx(styles.wrapper, "row")}>
       <div className={clsx(styles.wrapper_content_left, "col-6")}>
@@ -169,7 +218,6 @@ function ProductAdd(): JSX.Element {
               {validate.sku}
             </small>
           </Form.Group>
-
           <Form.Group
             as={Row}
             className={clsx(styles.input, "mb-4")}
@@ -241,18 +289,31 @@ function ProductAdd(): JSX.Element {
           </Form.Group>
 
           <div className={clsx(styles.btn_wrapper)}>
-            <Button className={clsx(styles.btn)} onClick={uploadAvatarImage}>
-              Tải ảnh bìa
-            </Button>
+            <div className={clsx(styles.btn)}>
+              <div>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p>Thả hình ảnh vào đây...</p>
+                  ) : (
+                    <Button>Tải ảnh đại diện</Button>
+                  )}
+                </div>
+              </div>
+            </div>
 
-            <Button
-              className={clsx(styles.btn)}
-              onClick={uploadDescriptionImage}
-            >
-              Tải ảnh mô tả
-            </Button>
+            <div>
+              <div {...getRootProps()}>
+                <input {...getInputProps({ multiple: true })} />
+                {isDragActive ? (
+                  <p>Thả hình ảnh vào đây...</p>
+                ) : (
+                  <Button>Tải ảnh mô tả</Button>
+                )}
+              </div>
+            </div>
           </div>
-          <Button className={clsx(styles.btn_save)} onClick={handleSaveInfo}>
+          <Button className={clsx(styles.btn_save)} onClick={handleSubmit}>
             Lưu
           </Button>
         </form>
@@ -264,26 +325,40 @@ function ProductAdd(): JSX.Element {
         <div className={clsx(styles.preview_product, "row")}>
           <div className={clsx(styles.content_preview_product_left, "col-6")}>
             <div className={styles.preview}>
-              <img
-                src="https://product.hstatic.net/200000542683/product/dac-nhan-tam-bia-cung_7b27996e707248f686f5949517965ddb.jpg"
-                alt="img-preview"
-              />
+              {base64Image && (
+                <img
+                  src={base64Image}
+                  alt="Uploaded"
+                  style={{ maxWidth: "100%" }}
+                />
+              )}
+
+              <div className="row">
+                {base64Images.map((base64Image, index) => (
+                  <div key={index} className="col-2">
+                    <img src={base64Image} alt="Uploaded" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className={clsx(styles.content_preview_product_right, "col-6")}>
             <div className={clsx(styles.name)}>
-              <h2>Đắc Nhân Tâm</h2>
+              <h2>{nameProduct}</h2>
             </div>
             <div className={styles.author}>
               <h2>
-                <b>Tác giả: </b>Chưa cập nhật
+                <b>Tác giả: </b>
+                {author}
               </h2>
             </div>
             <div className={styles.prices}>
-              <h2>126.000VNĐ</h2>
+              <h2>{price}</h2>
             </div>
             <div className={styles.wrapper_btn}>
-              <button>-</button>1<button>+</button>
+              <button>-</button>
+              {number}
+              <button>+</button>
             </div>
           </div>
         </div>
