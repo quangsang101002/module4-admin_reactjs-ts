@@ -8,6 +8,7 @@ import Row from "react-bootstrap/Row";
 import productAPI from "../../../../apis/products/products.api";
 import { Local } from "../../../../utilities/number.util";
 import { useDropzone } from "react-dropzone";
+import { AiOutlinePlusCircle } from "react-icons/ai";
 
 function ProductAdd(): JSX.Element {
   const [code, setCode] = useState<string>("");
@@ -177,7 +178,7 @@ function ProductAdd(): JSX.Element {
 
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
-
+    setAvatar(file);
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -186,6 +187,7 @@ function ProductAdd(): JSX.Element {
     };
     reader.readAsDataURL(file);
 
+    setGallery(acceptedFiles);
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -218,21 +220,6 @@ function ProductAdd(): JSX.Element {
               {validate.sku}
             </small>
           </Form.Group>
-          <Form.Group
-            as={Row}
-            className={clsx(styles.input, "mb-4")}
-            controlId="formPlaintextEmail"
-          >
-            <Col sm="10">
-              <Form.Control
-                type="email"
-                name="text"
-                placeholder="Tên Tác giả"
-                value={author}
-                onChange={(event) => setAuthor(event.target.value)}
-              />
-            </Col>
-          </Form.Group>
 
           <Form.Group
             as={Row}
@@ -252,6 +239,22 @@ function ProductAdd(): JSX.Element {
             <small className="text-center" style={{ color: "red" }}>
               {validate.nameProduct}
             </small>
+          </Form.Group>
+
+          <Form.Group
+            as={Row}
+            className={clsx(styles.input, "mb-4")}
+            controlId="formPlaintextEmail"
+          >
+            <Col sm="10">
+              <Form.Control
+                type="email"
+                name="text"
+                placeholder="Tên Tác giả"
+                value={author}
+                onChange={(event) => setAuthor(event.target.value)}
+              />
+            </Col>
           </Form.Group>
 
           <Form.Group
@@ -332,13 +335,23 @@ function ProductAdd(): JSX.Element {
                   style={{ maxWidth: "100%" }}
                 />
               )}
-
-              <div className="row">
-                {base64Images.map((base64Image, index) => (
-                  <div key={index} className="col-2">
+              <div className={styles.wrapper_preview_content}>
+                {base64Images.slice(0, 6).map((base64Image, index) => (
+                  <div
+                    key={index}
+                    className={clsx(styles.preview_gallery, "col-2")}
+                  >
                     <img src={base64Image} alt="Uploaded" />
                   </div>
                 ))}
+                {base64Images.length > 6 ? (
+                  <div>
+                    <AiOutlinePlusCircle />
+                    {base64Images.length - 6}
+                  </div>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
           </div>
@@ -353,12 +366,10 @@ function ProductAdd(): JSX.Element {
               </h2>
             </div>
             <div className={styles.prices}>
-              <h2>{price}</h2>
+              <h2>{number}</h2>
             </div>
             <div className={styles.wrapper_btn}>
-              <button>-</button>
-              {number}
-              <button>+</button>
+              <Button>-</Button>1<Button>+</Button>
             </div>
           </div>
         </div>
