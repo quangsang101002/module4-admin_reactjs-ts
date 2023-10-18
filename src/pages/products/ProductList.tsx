@@ -11,16 +11,23 @@ import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { IoMdAddCircle } from "react-icons/io";
 import Pagination from "../../components/table/Pagination";
 import { Product } from "./ProductsInterFace";
+
 function ProductList() {
   const [displayProduct, setDisplayProduct] = useState<Product[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [isProduct, setProduct] = useState<boolean>(false);
+  const [idCheck, setIdCheck] = useState<number[]>([]);
 
   useEffect(() => {
-    fetchDataProduct();
-  }, []);
+    searchProducts();
+  }, [search]);
 
-  const fetchDataProduct = async () => {
+  useEffect(() => {
+    searchProducts();
+  }, [isProduct]);
+  const searchProducts = async () => {
     try {
-      const response = await productAPI.ShowProduct("", 7, 1);
+      const response = await productAPI.SearchProduct(search, 7, 1);
       if (response) {
         setDisplayProduct(response.result.recount);
       } else {
@@ -31,94 +38,146 @@ function ProductList() {
     }
   };
 
+  const deleteProducts = async (id: number) => {
+    try {
+      await productAPI.deleteProduct(id);
+      setProduct(!isProduct);
+    } catch (error) {}
+  };
+  const searchProduct = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
+
+  const handleId = (idInput: number) => {
+    const isIdExist = idCheck.includes(idInput);
+
+    if (isIdExist) {
+      const updatedIds = idCheck.filter((id) => id !== idInput);
+      setIdCheck(updatedIds);
+    } else {
+      setIdCheck([...idCheck, idInput]);
+    }
+  };
+  const handleDeleteAll = () => {
+    if (idCheck.length === displayProduct.length) {
+      setIdCheck([]);
+    } else {
+      const getId = displayProduct.map((id) => id.product_id);
+      setIdCheck(getId);
+    }
+  };
+
+  console.log(idCheck);
+
+  const handleDelete = async () => {
+    try {
+      await productAPI.deleteProduct(idCheck);
+      await setProduct(!isProduct);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <div className="">
-      <div className="">
-        <div className={Styles.header_content}>
-          <div className={Styles.header_title}>
-            <h1>Quản lí sản phẩm</h1>
-          </div>
-          <div className={Styles.input_search}>
-            <input type="text" placeholder="Search..."></input>
-            <small className={Styles.search}>
-              <IoIosSearch />
-            </small>
-          </div>
-          <div className={Styles.add_product}>
-            <Link to="/admin/product_add">
-              <Button className={Styles.btn_create_product}>
-                <IoMdAddCircle />
-                Thêm Mới
-              </Button>
-              <Button className={Styles.btn_create_product}>Xóa Tất Cả</Button>
-            </Link>
-          </div>
+    <div className={Styles.wrapper}>
+      <div className={Styles.header_content}>
+        <div className={Styles.header_title}>
+          <h1>Quản lí sản phẩm</h1>
         </div>
-
-        <table id="customers">
-          <thead>
-            <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
-              <th>Mã sản phẩm</th>
-              <th>Tên sản phẩm</th>
-              <th>Đơn giá</th>
-              <th>Mô tả</th>
-              <th>Phân loại</th>
-              <th>Thời gian tạo</th>
-              <th>Thời gian cập nhật</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody className={Styles.wrapper_table}>
-            {displayProduct.length === 0 ? (
-              <div className={clsx(Styles.serach_emrty)}>
-                <h1 className="text-center">Không có sản phẩm nào</h1>
-              </div>
-            ) : (
-              <>
-                {displayProduct.map((user, index) => (
-                  <tr key={user.id}>
-                    <td>
-                      <input type="checkbox" />
-                    </td>
-                    <td>{user.sku}</td>
-                    <td>{user.name}</td>
-                    <td>{user.unit_price}</td>
-                    <td>{user.description}</td>
-                    <td>
-                      {user.category === 1
-                        ? "STN"
-                        : user.category === 2
-                        ? "VH & NT"
-                        : "T & TT"}
-                    </td>
-
-                    <td>
-                      {moment(user.created_at).format("YYYY-MM-DD HH:mm")}
-                    </td>
-                    <td>
-                      {moment(user.updated_at).format("YYYY-MM-DD HH:mm")}
-                    </td>
-                    <td className="edit-main">
-                      <Link to="/admin/product_edit">
-                        {" "}
-                        <Button>Sửa </Button>
-                      </Link>
-
-                      <Button className="ml-3" variant="danger">
-                        Xóa
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </>
-            )}
-          </tbody>
-        </table>
-        <Pagination />
+        <div className={Styles.input_search}>
+          <input
+            type="text"
+            placeholder="Search..."
+            onChange={searchProduct}
+          ></input>
+          <small className={Styles.search}>
+            <IoIosSearch />
+          </small>
+        </div>
+        <div className={Styles.add_product}>
+          <Link to="/admin/product_add">
+            <Button className={Styles.btn_create_product}>
+              <IoMdAddCircle />
+              Thêm Mới
+            </Button>
+          </Link>
+          <Button className={Styles.btn_create_product} onClick={handleDelete}>
+            Xóa Tất Cả
+          </Button>
+        </div>
       </div>
+
+      <table id="customers">
+        <thead>
+          <tr>
+            <th>
+              <input
+                type="checkbox"
+                onChange={handleDeleteAll}
+                checked={idCheck.length === displayProduct.length}
+              />
+            </th>
+            <th>Mã sản phẩm</th>
+            <th>Tên sản phẩm</th>
+            <th>Đơn giá</th>
+            <th>Mô tả</th>
+            <th>Phân loại</th>
+            <th>Thời gian tạo</th>
+            <th>Thời gian cập nhật</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody className={Styles.wrapper_table}>
+          {displayProduct.length === 0 ? (
+            <div className={clsx(Styles.serach_emrty)}>
+              <h1 className="text-center">Không có sản phẩm nào</h1>
+            </div>
+          ) : (
+            <>
+              {displayProduct.map((user, index) => (
+                <tr key={user.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      onChange={() => handleId(user.product_id)}
+                      checked={idCheck.includes(user.product_id)}
+                    />
+                  </td>
+                  <td>{user.sku}</td>
+                  <td>{user.name}</td>
+                  <td>{user.unit_price}</td>
+                  <td>{user.description}</td>
+                  <td>
+                    {user.category === 1
+                      ? "STN"
+                      : user.category === 2
+                      ? "VH & NT"
+                      : "T & TT"}
+                  </td>
+
+                  <td>{moment(user.created_at).format("YYYY-MM-DD HH:mm")}</td>
+                  <td>{moment(user.updated_at).format("YYYY-MM-DD HH:mm")}</td>
+                  <td className="edit-main">
+                    <Link to={`/admin/product_edit/${user.product_id}`}>
+                      {" "}
+                      <Button>Sửa </Button>
+                    </Link>
+
+                    <Button
+                      className="ml-3"
+                      variant="danger"
+                      onClick={() => deleteProducts(user.product_id)}
+                    >
+                      Xóa
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
+        </tbody>
+      </table>
+      <Pagination />
     </div>
   );
 }

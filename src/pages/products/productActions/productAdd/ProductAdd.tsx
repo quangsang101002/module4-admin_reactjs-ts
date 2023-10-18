@@ -6,7 +6,6 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import productAPI from "../../../../apis/products/products.api";
-import { Local } from "../../../../utilities/number.util";
 import { useDropzone } from "react-dropzone";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 
@@ -26,7 +25,8 @@ function ProductAdd(): JSX.Element {
   const [base64Image, setBase64Image] = useState<string>("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
 
-  console.log("base64Images", base64Images);
+  console.log("avatar", avatar);
+  console.log("gallery", gallery);
 
   interface Product {
     category: number;
@@ -109,7 +109,6 @@ function ProductAdd(): JSX.Element {
     const numericValue = inputValue.replace(/,/, ""); // Chuyển chuỗi thành số
 
     setPrice(parseInt(numericValue)); // Lưu dưới dạng số
-    console.log(numericValue);
 
     setNumber(new Intl.NumberFormat().format(Number(numericValue) || 0));
   };
@@ -187,6 +186,29 @@ function ProductAdd(): JSX.Element {
     };
     reader.readAsDataURL(file);
 
+    // setGallery(acceptedFiles);
+    // acceptedFiles.forEach((file) => {
+    //   const reader = new FileReader();
+    //   reader.onload = () => {
+    //     const base64Data = reader.result as string;
+    //     setBase64Images((prevImages) => [...prevImages, base64Data]);
+    //   };
+    //   reader.readAsDataURL(file);
+    // });
+  };
+
+  const onDrop2 = (acceptedFiles: File[]) => {
+    // console.log("onDrop2", onDrop2);
+    // const file = acceptedFiles[0];
+    // setAvatar(file);
+    // const reader = new FileReader();
+
+    // reader.onload = () => {
+    //   const base64Data: string = reader.result as string;
+    //   setBase64Image(base64Data);
+    // };
+    // reader.readAsDataURL(file);
+
     setGallery(acceptedFiles);
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -199,6 +221,13 @@ function ProductAdd(): JSX.Element {
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const dropzone = useDropzone({
+    onDrop: onDrop2,
+  });
+
+  dropzone.getRootProps;
+  dropzone.getInputProps;
+  dropzone.isDragActive;
   return (
     <div className={clsx(styles.wrapper, "row")}>
       <div className={clsx(styles.wrapper_content_left, "col-6")}>
@@ -295,7 +324,7 @@ function ProductAdd(): JSX.Element {
             <div className={clsx(styles.btn)}>
               <div>
                 <div {...getRootProps()}>
-                  <input {...getInputProps()} />
+                  {/* <input {...getRootProps({ multiple: false })} /> */}
                   {isDragActive ? (
                     <p>Thả hình ảnh vào đây...</p>
                   ) : (
@@ -306,9 +335,9 @@ function ProductAdd(): JSX.Element {
             </div>
 
             <div>
-              <div {...getRootProps()}>
-                <input {...getInputProps({ multiple: true })} />
-                {isDragActive ? (
+              <div {...dropzone.getRootProps()}>
+                {/* <input {...dropzone.getInputProps({ multiple: true })} /> */}
+                {dropzone.isDragActive ? (
                   <p>Thả hình ảnh vào đây...</p>
                 ) : (
                   <Button>Tải ảnh mô tả</Button>

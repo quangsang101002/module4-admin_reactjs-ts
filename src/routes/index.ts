@@ -41,7 +41,7 @@ const routes: RouteObject[] = [
     ],
   },
   {
-    path: "/admin/product_edit",
+    path: "/admin/product_edit/:id",
     Component: DefaultLayout,
     children: [
       {

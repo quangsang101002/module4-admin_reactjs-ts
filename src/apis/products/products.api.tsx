@@ -3,7 +3,7 @@ import { BodyProduct } from "./products.interFace.api";
 import { LoginResponse } from "../auth/auth/responses/login.response";
 import { getAccessToken } from "../../utilities/token.util";
 
-const ShowProduct = async (name: string, limit: number, page: number) => {
+const SearchProduct = async (name: string, limit: number, page: number) => {
   const params = {
     name: name,
     limit: limit,
@@ -43,18 +43,14 @@ const updateProduct = async (id: any, bodyProducts: FormData) => {
     const param: LoginResponse = {
       token: accessToken,
     };
-
-    return await api
-      .put(`/product/${id}`, bodyProducts, {
+    try {
+      const response = await api.putForm(`/product/${id}`, bodyProducts, {
         params: param,
-      })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.error("API Error", error);
-        throw error;
       });
+      return response.data;
+    } catch (error: any) {
+      return Promise.reject(error.response.data.error);
+    }
   }
 };
 
@@ -91,7 +87,7 @@ const getProductDetail = async (id: any) => {
   }
 };
 const productAPI = {
-  ShowProduct,
+  SearchProduct,
   addProduct,
   updateProduct,
   deleteProduct,
