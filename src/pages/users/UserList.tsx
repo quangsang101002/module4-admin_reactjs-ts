@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
 import "../../components/GlobalStyles/globalSTyleTable/StyleTable.scss";
 import { IoMdAddCircle } from "react-icons/io";
-import Pagination from "../../components/table/Pagination";
 import { Product } from "../products/ProductsInterFace";
 function ProductList() {
   const [displayProduct, setDisplayProduct] = useState<Product[]>([]);
@@ -116,7 +115,6 @@ function ProductList() {
             )}
           </tbody>
         </table>
-        <Pagination />
       </div>
     </div>
   );

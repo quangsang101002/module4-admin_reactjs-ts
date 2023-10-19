@@ -64,6 +64,18 @@
       .wrapper_preview_content {
         display: flex;
         margin: 0;
+        .hide_img {
+          position: relative;
+        }
+        .wrapper_quantity {
+          position: absolute;
+          color: #000;
+          right: 10px;
+          margin-top: 16px;
+          display: flex;
+          align-items: center;
+          font-size: 11px;
+        }
       }
 
       img {

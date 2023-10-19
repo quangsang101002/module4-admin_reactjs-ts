@@ -7,9 +7,8 @@ import productAPI from "../../apis/products/products.api";
 import { Link } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
 import "../../components/GlobalStyles/globalSTyleTable/StyleTable.scss";
-import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import { IoMdAddCircle } from "react-icons/io";
-import Pagination from "../../components/table/Pagination";
+import PaginationAdmin from "../../components/table/Pagination";
 import { Product } from "./ProductsInterFace";
 
 function ProductList() {
@@ -17,19 +16,23 @@ function ProductList() {
   const [search, setSearch] = useState<string>("");
   const [isProduct, setProduct] = useState<boolean>(false);
   const [idCheck, setIdCheck] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(2);
+  const [totalProduct, setTotalProduct] = useState<number>(1);
 
   useEffect(() => {
     searchProducts();
-  }, [search]);
+  }, [search, currentPage]);
 
   useEffect(() => {
     searchProducts();
   }, [isProduct]);
   const searchProducts = async () => {
     try {
-      const response = await productAPI.SearchProduct(search, 7, 1);
+      const response = await productAPI.SearchProduct(search, 7, currentPage);
+      console.log(response);
       if (response) {
         setDisplayProduct(response.result.recount);
+        setTotalProduct(response.result.totalProduct);
       } else {
         alert("Invalid response format");
       }
@@ -67,7 +70,10 @@ function ProductList() {
     }
   };
 
-  console.log(idCheck);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    console.log("1,", page);
+  };
 
   const handleDelete = async () => {
     try {
@@ -177,7 +183,7 @@ function ProductList() {
           )}
         </tbody>
       </table>
-      <Pagination />
+      <PaginationAdmin total={90} setPage={handlePageChange} />
     </div>
   );
 }

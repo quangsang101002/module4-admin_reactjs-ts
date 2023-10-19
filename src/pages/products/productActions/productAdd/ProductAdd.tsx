@@ -364,17 +364,28 @@ function ProductAdd(): JSX.Element {
                   style={{ maxWidth: "100%" }}
                 />
               )}
-              <div className={styles.wrapper_preview_content}>
+              <div
+                className={styles.wrapper_preview_content}
+                style={{ position: "relative" }}
+              >
                 {base64Images.slice(0, 6).map((base64Image, index) => (
                   <div
                     key={index}
                     className={clsx(styles.preview_gallery, "col-2")}
                   >
-                    <img src={base64Image} alt="Uploaded" />
+                    <img
+                      src={base64Image}
+                      alt="Uploaded"
+                      style={{
+                        opacity: index === 5 ? 0.5 : 1,
+                      }}
+                      className={index === 5 ? styles.hide_img : ""}
+                    />
                   </div>
                 ))}
+
                 {base64Images.length > 6 ? (
-                  <div>
+                  <div className={styles.wrapper_quantity}>
                     <AiOutlinePlusCircle />
                     {base64Images.length - 6}
                   </div>
