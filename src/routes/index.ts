@@ -12,6 +12,7 @@ import OrderList from "../pages/orders/OrderList";
 import Header from "../components/partials/Header";
 import ProductAdd from "../pages/products/productActions/productAdd/ProductAdd";
 import ProductEdit from "../pages/products/productActions/productEdit/ProductEdit";
+import UserAdd from "../pages/users/userAction/UserAdd";
 const routes: RouteObject[] = [
   {
     Component: Header,
@@ -67,6 +68,16 @@ const routes: RouteObject[] = [
       {
         index: true,
         Component: UserList,
+      },
+    ],
+  },
+  {
+    path: "/admin/user_add",
+    Component: DefaultLayout,
+    children: [
+      {
+        index: true,
+        Component: UserAdd,
       },
     ],
   },

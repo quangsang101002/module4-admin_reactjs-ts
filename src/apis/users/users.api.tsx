@@ -50,8 +50,27 @@ const deleteUser = async (id: any) => {
       });
   }
 };
+const AddUser = async (requestBody: any) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param = {
+      token: accessToken,
+    };
+    try {
+      await api
+        .postForm("/users", requestBody, { headers: param })
+        .then((response) => {
+          return response.data;
+        });
+    } catch (error) {
+      console.error("API Error", error);
+      throw error;
+    }
+  }
+};
 const UserApi = {
   SearchUser,
   deleteUser,
+  AddUser,
 };
 export default UserApi;

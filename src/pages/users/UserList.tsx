@@ -19,8 +19,6 @@ function ProductList() {
   const [isChange, setIsChange] = useState<boolean>(false);
   const [idUser, setIdUser] = useState<number[]>([]);
 
-  console.log("----------------------------------", idUser);
-
   useEffect(() => {
     fetchDataProduct();
   }, []);
@@ -97,7 +95,7 @@ function ProductList() {
           </small>
         </div>
         <div className="add_product">
-          <Link to="/admin/product_add">
+          <Link to="/admin/user_add">
             <Button className="btn_create_product">
               <IoMdAddCircle />
               Thêm Mới
@@ -155,7 +153,7 @@ function ProductList() {
                   <td>{moment(user.created_at).format("YYYY-MM-DD HH:mm")}</td>
                   <td>{moment(user.updated_at).format("YYYY-MM-DD HH:mm")}</td>
                   <td className="edit-main">
-                    <Link to="/admin/product_edit">
+                    <Link to="/admin/user_add">
                       {" "}
                       <Button>Sửa </Button>
                     </Link>
