@@ -8,19 +8,32 @@ import { Link } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
 import "../../components/GlobalStyles/globalSTyleTable/StyleTable.scss";
 import { IoMdAddCircle } from "react-icons/io";
-import { Product } from "../products/ProductsInterFace";
+import { User } from "../../../src/apis/GlobleIterface/GlobleInterFace";
+import PaginationAdmin from "../../components/table/Pagination";
+import PageNotFound from "../../components/errors/PageNotFound";
 function ProductList() {
-  const [displayProduct, setDisplayProduct] = useState<Product[]>([]);
+  const [displayProduct, setDisplayProduct] = useState<User[]>([]);
+  const [search, setSeach] = useState<string>("");
+  const [totalProduct, setTotalProduct] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isChange, setIsChange] = useState<boolean>(false);
+  const [idUser, setIdUser] = useState<number[]>([]);
+
+  console.log("----------------------------------", idUser);
 
   useEffect(() => {
     fetchDataProduct();
   }, []);
 
+  useEffect(() => {
+    fetchDataProduct();
+  }, [search, currentPage, isChange]);
   const fetchDataProduct = async () => {
     try {
-      const response = await UserApi.SearchUser("", 7, 1);
+      const response = await UserApi.SearchUser(search, 7, currentPage);
       if (response) {
         setDisplayProduct(response.result.recount);
+        setTotalProduct(response.result.total);
       } else {
         alert("Invalid response format");
       }
@@ -29,93 +42,139 @@ function ProductList() {
     }
   };
 
+  const searchUser = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSeach(event.target.value);
+  };
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  const DeleteUser = async (id: number) => {
+    try {
+      await UserApi.deleteUser(id);
+      setIsChange(!isChange);
+    } catch (err) {
+      alert(err);
+    }
+  };
+  const getId = (id: number) => {
+    if (idUser.includes(id)) {
+      const exits = idUser.filter((Userid) => Userid != id);
+      setIdUser(exits);
+    } else {
+      setIdUser([...idUser, id]);
+    }
+  };
+  const getAllId = () => {
+    if (displayProduct.length === idUser.length) {
+      setIdUser([]);
+    } else {
+      const allId = displayProduct.map((userId) => userId.id);
+      setIdUser(allId);
+    }
+  };
+  const handleDeleteAll = async () => {
+    try {
+      await UserApi.deleteUser(idUser);
+      setIsChange(!isChange);
+    } catch (err) {
+      alert(err);
+    }
+  };
   return (
-    <div className="">
-      <div className="">
-        <div className={Styles.header_content}>
-          <div className={Styles.header_title}>
-            <h1>Quản lí sản phẩm</h1>
-          </div>
-          <div className={Styles.input_search}>
-            <input type="text" placeholder="Search..."></input>
-            <small className={Styles.search}>
-              <IoIosSearch />
-            </small>
-          </div>
-          <div className={Styles.add_product}>
-            <Link to="/admin/product_add">
-              <Button className={Styles.btn_create_product}>
-                <IoMdAddCircle />
-                Thêm Mới
-              </Button>
-              <Button className={Styles.btn_create_product}>Xóa Tất Cả</Button>
-            </Link>
-          </div>
+    <div className="wrapper">
+      <div className="header_content">
+        <div className="header_title">
+          <h1>Quản lí người dùng</h1>
         </div>
-
-        <table id="customers">
-          <thead>
-            <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
-              <th>Mã sản phẩm</th>
-              <th>Tên sản phẩm</th>
-              <th>Đơn giá</th>
-              <th>Mô tả</th>
-              <th>Phân loại</th>
-              <th>Thời gian tạo</th>
-              <th>Thời gian cập nhật</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody className={Styles.wrapper_table}>
-            {displayProduct.length === 0 ? (
-              <div className={clsx(Styles.serach_emrty)}>
-                <h1 className="text-center">Không có sản phẩm nào</h1>
-              </div>
-            ) : (
-              <>
-                {displayProduct.map((user, index) => (
-                  <tr key={user.id}>
-                    <td>
-                      <input type="checkbox" />
-                    </td>
-                    <td>{user.sku}</td>
-                    <td>{user.name}</td>
-                    <td>{user.unit_price}</td>
-                    <td>{user.description}</td>
-                    <td>
-                      {user.category === 1
-                        ? "STN"
-                        : user.category === 2
-                        ? "VH & NT"
-                        : "T & TT"}
-                    </td>
-
-                    <td>
-                      {moment(user.created_at).format("YYYY-MM-DD HH:mm")}
-                    </td>
-                    <td>
-                      {moment(user.updated_at).format("YYYY-MM-DD HH:mm")}
-                    </td>
-                    <td className="edit-main">
-                      <Link to="/admin/product_edit">
-                        {" "}
-                        <Button>Sửa </Button>
-                      </Link>
-
-                      <Button className="ml-3" variant="danger">
-                        Xóa
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </>
-            )}
-          </tbody>
-        </table>
+        <div className="input_search">
+          <input
+            type="text"
+            placeholder="Search..."
+            onChange={searchUser}
+          ></input>
+          <small className="search">
+            <IoIosSearch />
+          </small>
+        </div>
+        <div className="add_product">
+          <Link to="/admin/product_add">
+            <Button className="btn_create_product">
+              <IoMdAddCircle />
+              Thêm Mới
+            </Button>
+          </Link>
+          <Button className="btn_create_product" onClick={handleDeleteAll}>
+            Xóa Tất Cả
+          </Button>
+        </div>
       </div>
+
+      <table id="customers">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" onChange={getAllId} />
+            </th>
+            <th>Tên Đăng Nhập</th>
+            <th>Email</th>
+            <th>Tên Người Dùng</th>
+            <th>Vai Trò</th>
+
+            <th>Thời gian tạo</th>
+            <th>Thời gian cập nhật</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody className={Styles.wrapper_table}>
+          {displayProduct.length === 0 ? (
+            <tr>
+              <td colSpan={9}>
+                <h1 className="text-center">Không có sản phẩm nào</h1>
+              </td>
+            </tr>
+          ) : (
+            <>
+              {displayProduct.map((user, index) => (
+                <tr key={user.id}>
+                  <td>
+                    <input type="checkbox" onChange={() => getId(user.id)} />
+                  </td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    {" "}
+                    {user.role === 1 ? (
+                      <span>Admin</span>
+                    ) : (
+                      <span>Customers</span>
+                    )}
+                  </td>
+                  <td>
+                    {user.first_name} {user.last_name}
+                  </td>
+                  <td>{moment(user.created_at).format("YYYY-MM-DD HH:mm")}</td>
+                  <td>{moment(user.updated_at).format("YYYY-MM-DD HH:mm")}</td>
+                  <td className="edit-main">
+                    <Link to="/admin/product_edit">
+                      {" "}
+                      <Button>Sửa </Button>
+                    </Link>
+
+                    <Button
+                      className="ml-3"
+                      variant="danger"
+                      onClick={() => DeleteUser(user.id)}
+                    >
+                      Xóa
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
+        </tbody>
+      </table>
+      <PaginationAdmin total={totalProduct} setPage={handlePageChange} />
     </div>
   );
 }

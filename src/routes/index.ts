@@ -21,7 +21,7 @@ const routes: RouteObject[] = [
     Component: LoginPage,
   },
   {
-    path: "/admin/product/:id",
+    path: "/admin/product",
     Component: DefaultLayout,
     children: [
       {

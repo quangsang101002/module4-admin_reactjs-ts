@@ -55,6 +55,8 @@ const updateProduct = async (id: any, bodyProducts: FormData) => {
 };
 
 const deleteProduct = async (id: any) => {
+  console.log("id=", id);
+
   const accessToken = getAccessToken();
   if (accessToken !== null) {
     const param: LoginResponse = {

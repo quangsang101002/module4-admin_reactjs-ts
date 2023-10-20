@@ -16,8 +16,9 @@ function ProductList() {
   const [search, setSearch] = useState<string>("");
   const [isProduct, setProduct] = useState<boolean>(false);
   const [idCheck, setIdCheck] = useState<number[]>([]);
-  const [currentPage, setCurrentPage] = useState<number>(2);
-  const [totalProduct, setTotalProduct] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalProduct, setTotalProduct] = useState<number>(0);
+  console.log(idCheck);
 
   useEffect(() => {
     searchProducts();
@@ -72,7 +73,6 @@ function ProductList() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    console.log("1,", page);
   };
 
   const handleDelete = async () => {
@@ -183,7 +183,7 @@ function ProductList() {
           )}
         </tbody>
       </table>
-      <PaginationAdmin total={90} setPage={handlePageChange} />
+      <PaginationAdmin total={totalProduct} setPage={handlePageChange} />
     </div>
   );
 }
