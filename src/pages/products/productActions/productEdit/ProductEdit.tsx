@@ -56,8 +56,6 @@ function ProductEdit(): JSX.Element {
       );
 
       if (matchingProduct) {
-        console.log(matchingProduct);
-
         setCode(matchingProduct.sku);
         setPrice(matchingProduct.unit_price);
         setAuthor(matchingProduct.description);

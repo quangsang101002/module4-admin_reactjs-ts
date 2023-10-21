@@ -6,46 +6,24 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { useDropzone } from "react-dropzone";
-import { AiOutlinePlusCircle } from "react-icons/ai";
 import UserApi from "../../../apis/users/users.api";
 
 function UserAdd(): JSX.Element {
   const [userName, setUserName] = useState<string>("");
   const [email, setMail] = useState<string>("");
-  const [price, setPrice] = useState<number>(0);
   const [firstName, setFirtName] = useState<string>("");
   const [lastName, setLName] = useState<string>("");
-  const [classify, setClassify] = useState<string>("");
+  const [passWord, setPassWord] = useState<string>("");
+  const [repeatPassWord, setRepeatPassWord] = useState<string>("");
+  const [role, setRole] = useState<string>("");
   const [dataChanged, setDataChanged] = useState<boolean>(false);
-  const [show, setShow] = useState<boolean>(false);
   const [avatar, setAvatar] = useState<File | null>(null);
-  const [gallery, setGallery] = useState<File[] | null>([]);
-  const [number, setNumber] = useState<string>("");
   const [validate, setValidate] = useState<{ [key: string]: string }>({});
-  const [productPreview, setproductPreview] = useState<Product[]>([]);
   const [base64Image, setBase64Image] = useState<string>("");
-  const [base64Images, setBase64Images] = useState<string[]>([]);
-
-  console.log("avatar", avatar);
-  console.log("gallery", gallery);
-
-  interface Product {
-    category: number;
-    created_at: string;
-    created_by_id: number;
-    description: string;
-    image: string;
-    name: string;
-    product_id: number;
-    sku: string;
-    unit_price: number;
-    updated_at: string;
-    updated_by_id: number;
-  }
 
   useEffect(() => {
     setDataChanged(true);
-  }, [userName, email, price, firstName, classify, avatar, gallery]);
+  }, [userName, email, firstName, lastName, avatar, role]);
 
   useEffect(() => {
     window.addEventListener("beforeunload", confirmExit);
@@ -74,90 +52,45 @@ function UserAdd(): JSX.Element {
     }
   }
 
+  const addUser = async () => {
+    const allUser = {
+      username: userName,
+      email: email,
+      first_name: firstName,
+      last_name: lastName,
+      role: role,
+      password: passWord,
+      avatar: avatar,
+    };
+    if (email && firstName && lastName && passWord) {
+      try {
+        await UserApi.AddUser(allUser);
+      } catch (error) {
+        alert(error);
+      }
+    } else {
+      alert("bạn chưa điền đầy đủ thông tin");
+    }
+  };
+
   const handleAdd = async () => {
     const formData = new FormData();
-    // Thêm các trường dữ liệu sản phẩm vào formData
-    formData.append("sku", userName);
-    formData.append("name", email);
-    formData.append("category", classify);
-    formData.append("description", firstName);
-    formData.append("unit_price", price.toString());
-
-    // Kiểm tra xem avatar và gallery có giá trị trước khi thêm vào formData
     if (avatar) {
       formData.append("avatar", avatar);
     }
-    if (gallery) {
-      for (let img of gallery) {
-        formData.append("gallery", img);
-      }
-    }
-
     try {
-      // Gửi bodyProduct tới API để thêm sản phẩm
       await UserApi.AddUser(formData);
     } catch (error) {
-      setShow(true);
+      alert(error);
     }
   };
-
-  const getClassify = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    setClassify(event.target.value);
-  };
-
-  const setLastName = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const inputValue = event.target.value;
-    const numericValue = inputValue.replace(/,/, ""); // Chuyển chuỗi thành số
-
-    setPrice(parseInt(numericValue)); // Lưu dưới dạng số
-
-    setNumber(new Intl.NumberFormat().format(Number(numericValue) || 0));
-  };
-
-  const uploadAvatarImage = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.click();
-    fileInput.addEventListener("change", (e) => handleFileSelect(e));
-  };
-
-  const handleFileSelect = async (e: Event) => {
-    const inputElement = e.target as HTMLInputElement;
-    if (inputElement.files) {
-      const selectedFile = inputElement.files[0];
-
-      if (selectedFile) {
-        setAvatar(selectedFile);
-      }
-    }
-  };
-
-  const uploadDescriptionImage = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.multiple = true; // Cho phép chọn nhiều tệp
-    fileInput.click();
-    fileInput.addEventListener("change", (e) => handleFileSelectAll(e));
-  };
-  const handleFileSelectAll = async (e: Event) => {
-    const inputElement = e.target as HTMLInputElement;
-    if (inputElement.files) {
-      const selectedFiles = Array.from(inputElement.files); // Chuyển NodeList thành mảng
-      if (selectedFiles) {
-        setGallery(selectedFiles);
-      }
-    }
-  };
-
   const handleSubmit = () => {
     const validateError = validateName();
     if (validateError.size === 0) {
-      setShow(false);
-      handleAdd();
       setValidate({ someKey: "" });
+      addUser();
     } else {
       setValidate(Object.fromEntries(validateError));
-
       return;
     }
   };
@@ -169,7 +102,6 @@ function UserAdd(): JSX.Element {
       error.set("sku", "Mã sản phẩm không được bỏ trống");
     } else if (typeof email !== "string" || email.length === 0) {
       error.set("email", "Tên sản phẩm không được bỏ trống");
-    } else if (typeof price !== "number" || price.toString().length === 0) {
       error.set("price", "Đơn giá không được bỏ trống");
     }
 
@@ -186,49 +118,10 @@ function UserAdd(): JSX.Element {
       setBase64Image(base64Data);
     };
     reader.readAsDataURL(file);
-
-    // setGallery(acceptedFiles);
-    // acceptedFiles.forEach((file) => {
-    //   const reader = new FileReader();
-    //   reader.onload = () => {
-    //     const base64Data = reader.result as string;
-    //     setBase64Images((prevImages) => [...prevImages, base64Data]);
-    //   };
-    //   reader.readAsDataURL(file);
-    // });
-  };
-
-  const onDrop2 = (acceptedFiles: File[]) => {
-    // console.log("onDrop2", onDrop2);
-    // const file = acceptedFiles[0];
-    // setAvatar(file);
-    // const reader = new FileReader();
-
-    // reader.onload = () => {
-    //   const base64Data: string = reader.result as string;
-    //   setBase64Image(base64Data);
-    // };
-    // reader.readAsDataURL(file);
-
-    setGallery(acceptedFiles);
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Data = reader.result as string;
-        setBase64Images((prevImages) => [...prevImages, base64Data]);
-      };
-      reader.readAsDataURL(file);
-    });
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-  const dropzone = useDropzone({
-    onDrop: onDrop2,
-  });
 
-  dropzone.getRootProps;
-  dropzone.getInputProps;
-  dropzone.isDragActive;
   return (
     <div className={clsx(styles.wrapper, "row")}>
       <div className={clsx(styles.wrapper_content_left, "col-6")}>
@@ -259,8 +152,7 @@ function UserAdd(): JSX.Element {
             <Col sm="10">
               <Form.Control
                 type="text"
-                // as="textarea"
-                name="text"
+                name="email"
                 placeholder="Email"
                 value={email}
                 onChange={(event) => setMail(event.target.value)}
@@ -298,7 +190,7 @@ function UserAdd(): JSX.Element {
                 type="text"
                 placeholder="lastName"
                 value={lastName}
-                onChange={setLastName}
+                onChange={(event) => setLName(event.target.value)}
               />
             </Col>
             <small className="text-center" style={{ color: "red" }}></small>
@@ -314,8 +206,8 @@ function UserAdd(): JSX.Element {
                 maxLength={9}
                 type="text"
                 placeholder="passWord"
-                value={number}
-                onChange={setLastName}
+                value={passWord}
+                onChange={(event) => setPassWord(event.target.value)}
               />
             </Col>
             <small className="text-center" style={{ color: "red" }}></small>
@@ -331,8 +223,7 @@ function UserAdd(): JSX.Element {
                 maxLength={9}
                 type="text"
                 placeholder="repeatPassWord"
-                value={number}
-                onChange={setLastName}
+                value={repeatPassWord}
               />
             </Col>
             <small className="text-center" style={{ color: "red" }}></small>
@@ -342,8 +233,8 @@ function UserAdd(): JSX.Element {
             <Col sm="10">
               <Form.Select
                 className={clsx(styles.input_select, "mb-4")}
-                onChange={(event) => getClassify(event)}
-                value={classify}
+                onChange={(event) => setRole(event.target.value)}
+                value={role}
               >
                 <option disabled hidden value="">
                   Rode

@@ -12,7 +12,8 @@ import OrderList from "../pages/orders/OrderList";
 import Header from "../components/partials/Header";
 import ProductAdd from "../pages/products/productActions/productAdd/ProductAdd";
 import ProductEdit from "../pages/products/productActions/productEdit/ProductEdit";
-import UserAdd from "../pages/users/userAction/UserAdd";
+import UserAdd from "../pages/users/userAdd/UserAdd";
+import UserEdit from "../pages/users/userEdit/UserEdit";
 const routes: RouteObject[] = [
   {
     Component: Header,
@@ -78,6 +79,16 @@ const routes: RouteObject[] = [
       {
         index: true,
         Component: UserAdd,
+      },
+    ],
+  },
+  {
+    path: "/admin/user_edit/:id",
+    Component: DefaultLayout,
+    children: [
+      {
+        index: true,
+        Component: UserEdit,
       },
     ],
   },

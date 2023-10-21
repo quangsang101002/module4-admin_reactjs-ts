@@ -31,8 +31,6 @@ const SearchUser = async (name: string, limit: number, page: number) => {
   }
 };
 const deleteUser = async (id: any) => {
-  console.log("id", id);
-
   const accessToken = getAccessToken();
   if (accessToken !== undefined) {
     const param = {
@@ -48,6 +46,9 @@ const deleteUser = async (id: any) => {
         console.error("API Error", error);
         throw error;
       });
+  } else {
+    console.error("Access token is null.");
+    throw new Error("Access token is null.");
   }
 };
 const AddUser = async (requestBody: any) => {
@@ -66,11 +67,80 @@ const AddUser = async (requestBody: any) => {
       console.error("API Error", error);
       throw error;
     }
+  } else {
+    console.error("Access token is null.");
+    throw new Error("Access token is null.");
+  }
+};
+const addAvatar = async (id: number, avatar: FormData) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param = {
+      token: accessToken,
+    };
+    try {
+      return await api
+        .putForm(`/avatar/${id}`, avatar, { headers: param })
+        .then((response) => {
+          return response.data;
+        });
+    } catch (error) {
+      console.error("API Error", error);
+      throw error;
+    }
+  } else {
+    console.error("Access token is null.");
+    throw new Error("Access token is null.");
+  }
+};
+
+const getDetailUser = async (id: any) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param = {
+      token: accessToken,
+    };
+    return await api
+      .get(`/users/${id}`, { headers: param })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error("API Error", error);
+        throw error;
+      });
+  } else {
+    console.error("Access token is null.");
+    throw new Error("Access token is null.");
+  }
+};
+
+const updateUser = async (id: any, body: any) => {
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param = {
+      token: accessToken,
+    };
+    return await api
+      .put(`/users/${id}`, body, { headers: param })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error("API Error", error);
+        throw error;
+      });
+  } else {
+    console.error("Access token is null.");
+    throw new Error("Access token is null.");
   }
 };
 const UserApi = {
   SearchUser,
   deleteUser,
   AddUser,
+  addAvatar,
+  getDetailUser,
+  updateUser,
 };
 export default UserApi;

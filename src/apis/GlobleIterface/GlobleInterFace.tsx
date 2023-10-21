@@ -10,3 +10,15 @@ export interface User {
   updated_at: string;
   avatar: File | string;
 }
+export interface Order {
+  id: number;
+  serial_number: string;
+  username: string;
+  note: string;
+  order_at: string;
+  total_price: number;
+  status: string;
+  order_id: number;
+  created_at: string;
+  updated_at: string;
+}

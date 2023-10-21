@@ -11,13 +11,15 @@ import { IoMdAddCircle } from "react-icons/io";
 import { User } from "../../../src/apis/GlobleIterface/GlobleInterFace";
 import PaginationAdmin from "../../components/table/Pagination";
 import PageNotFound from "../../components/errors/PageNotFound";
-function ProductList() {
+function UserList() {
   const [displayProduct, setDisplayProduct] = useState<User[]>([]);
   const [search, setSeach] = useState<string>("");
   const [totalProduct, setTotalProduct] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isChange, setIsChange] = useState<boolean>(false);
   const [idUser, setIdUser] = useState<number[]>([]);
+
+  console.log("isChange", isChange);
 
   useEffect(() => {
     fetchDataProduct();
@@ -26,6 +28,7 @@ function ProductList() {
   useEffect(() => {
     fetchDataProduct();
   }, [search, currentPage, isChange]);
+
   const fetchDataProduct = async () => {
     try {
       const response = await UserApi.SearchUser(search, 7, currentPage);
@@ -49,7 +52,7 @@ function ProductList() {
   const DeleteUser = async (id: number) => {
     try {
       await UserApi.deleteUser(id);
-      setIsChange(!isChange);
+      await setIsChange(!isChange);
     } catch (err) {
       alert(err);
     }
@@ -153,7 +156,7 @@ function ProductList() {
                   <td>{moment(user.created_at).format("YYYY-MM-DD HH:mm")}</td>
                   <td>{moment(user.updated_at).format("YYYY-MM-DD HH:mm")}</td>
                   <td className="edit-main">
-                    <Link to="/admin/user_add">
+                    <Link to={`/admin/user_edit/${user.id}`}>
                       {" "}
                       <Button>Sửa </Button>
                     </Link>
@@ -177,4 +180,4 @@ function ProductList() {
   );
 }
 
-export default ProductList;
+export default UserList;
