@@ -16,9 +16,6 @@ import UserAdd from "../pages/users/userAdd/UserAdd";
 import UserEdit from "../pages/users/userEdit/UserEdit";
 const routes: RouteObject[] = [
   {
-    Component: Header,
-  },
-  {
     path: "/login",
     Component: LoginPage,
   },

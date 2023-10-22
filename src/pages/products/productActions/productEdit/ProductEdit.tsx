@@ -213,7 +213,9 @@ function ProductEdit(): JSX.Element {
       setBase64Image(base64Data);
     };
     reader.readAsDataURL(file);
+  };
 
+  const onDrop2 = (acceptedFiles: File[]) => {
     setGallery(acceptedFiles);
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -226,6 +228,14 @@ function ProductEdit(): JSX.Element {
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const dropzone = useDropzone({
+    onDrop: onDrop2,
+  });
+
+  dropzone.getRootProps;
+  dropzone.getInputProps;
+  dropzone.isDragActive;
+
   return (
     <div className={clsx(styles.wrapper, "row")}>
       <div className={clsx(styles.wrapper_content_left, "col-6")}>
@@ -327,7 +337,7 @@ function ProductEdit(): JSX.Element {
             <div className={clsx(styles.btn)}>
               <div>
                 <div {...getRootProps()}>
-                  <input {...getInputProps({ multiple: false })} />
+                  {/* <input {...getRootProps({ multiple: false })} /> */}
                   {isDragActive ? (
                     <p>Thả hình ảnh vào đây...</p>
                   ) : (
@@ -338,9 +348,9 @@ function ProductEdit(): JSX.Element {
             </div>
 
             <div>
-              <div {...getRootProps()}>
-                <input {...getInputProps({ multiple: true })} />
-                {isDragActive ? (
+              <div {...dropzone.getRootProps()}>
+                {/* <input {...dropzone.getInputProps({ multiple: true })} /> */}
+                {dropzone.isDragActive ? (
                   <p>Thả hình ảnh vào đây...</p>
                 ) : (
                   <Button>Tải ảnh mô tả</Button>

@@ -1,17 +1,23 @@
+// Header.tsx
 import React from "react";
 import styles from "./Header.module.scss";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { IoIosSearch } from "react-icons/io";
 import authAPI from "../../apis/auth/auth/requests/author.api";
 import { useState, useEffect } from "react";
-function Header() {
+import { GrClose } from "react-icons/gr";
+
+interface HeaderProps {
+  isHideSidebar: boolean;
+  setIsHideSidebar: (value: boolean) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ isHideSidebar, setIsHideSidebar }) => {
+  const handleHideSide = () => {
+    setIsHideSidebar(!isHideSidebar);
+  };
   const [avatar, setAvatar] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     try {
@@ -21,10 +27,19 @@ function Header() {
       setUserId(response.id);
     } catch (error) {}
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <header className={styles.wrapper}>
       <div className={styles.menu}>
-        <GiHamburgerMenu />
+        {isHideSidebar ? (
+          <GrClose onClick={handleHideSide} />
+        ) : (
+          <GiHamburgerMenu onClick={handleHideSide} />
+        )}
       </div>
 
       <div className={styles.infoAdmin}>
@@ -38,6 +53,6 @@ function Header() {
       </div>
     </header>
   );
-}
+};
 
 export default Header;

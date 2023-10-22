@@ -4,15 +4,31 @@ import clsx from "clsx";
 import Header from "../components/partials/Header";
 import Footer from "../components/partials/Footer";
 import Sidebar from "../components/partials/Sidebars";
+import { useState } from "react";
 
-const DefaultLayout = () => {
+const DefaultLayout: React.FC = () => {
+  const [isHideSidebar, setIsHideSidebar] = useState(false);
   return (
     <div className={clsx(styles.wrapper, "row")}>
-      <Header />
-      <div className={clsx(styles.content, "col-2")}>
-        <Sidebar />
+      <Header
+        isHideSidebar={isHideSidebar}
+        setIsHideSidebar={setIsHideSidebar}
+      />
+      <div
+        className={clsx(
+          styles.content,
+          styles.content_dashboard,
+          isHideSidebar ? "col-2" : ""
+        )}
+      >
+        {isHideSidebar ? <Sidebar /> : ""}
       </div>
-      <div className={clsx(styles.content_dashboard, "col-10")}>
+      <div
+        className={clsx(
+          styles.content_dashboard,
+          isHideSidebar ? "col-10" : ""
+        )}
+      >
         <Outlet />
       </div>
       <Footer />
