@@ -4,21 +4,27 @@ import { LoginResponse } from "../auth/auth/responses/login.response";
 import { getAccessToken } from "../../utilities/token.util";
 
 const SearchProduct = async (name: string, limit: number, page: number) => {
-  const params = {
-    name: name,
-    limit: limit,
-    page: page,
-  };
+  const accessToken = getAccessToken();
+  if (accessToken !== null) {
+    const param: LoginResponse = {
+      token: accessToken,
+    };
+    const params = {
+      name: name,
+      limit: limit,
+      page: page,
+    };
 
-  try {
-    const response = await api.get("/product", {
-      params: params,
-    });
+    try {
+      const response = await api.get("/product", {
+        params: params,
+      });
 
-    return response.data;
-  } catch (error) {
-    console.error("API Error", error);
-    throw error;
+      return response.data;
+    } catch (error) {
+      console.error("API Error", error);
+      throw error;
+    }
   }
 };
 const addProduct = async (bodyProducts: FormData) => {

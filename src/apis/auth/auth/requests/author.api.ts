@@ -43,9 +43,28 @@ const getAuth = async () => {
   }
 };
 
+const logout = async () => {
+  const accessToken = getAccessToken();
+
+  if (accessToken !== null) {
+    const param: LoginResponse = {
+      token: accessToken,
+    };
+    return await api
+      .post("/logout", { params: param })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+  }
+};
 const authAPI = {
   login,
   getAuth,
+  logout,
 };
 
 export default authAPI;

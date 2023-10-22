@@ -8,11 +8,13 @@ import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import authAPI from "../../apis/auth/auth/requests/author.api";
+import { useNavigate } from "react-router-dom";
 
 function Sidebars() {
   const [avatar, setAvatar] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -26,6 +28,16 @@ function Sidebars() {
       setUserId(response.id);
     } catch (error) {}
   };
+  const logoutUser = async () => {
+    try {
+      await authAPI.logout();
+      localStorage.removeItem("X-API-Key"); // Không cần gán cho logouted
+      navigate("/login");
+    } catch (error) {
+      console.error("Đã xảy ra lỗi khi đăng xuất:", error);
+    }
+  };
+
   return (
     <div className={clsx(styles.wrapper)}>
       <Menu>
@@ -61,7 +73,7 @@ function Sidebars() {
         </MenuItem>
         <MenuItem className={styles.manager}>
           <RiLogoutCircleRFill />
-          <h2>Đăng xuất</h2>
+          <h2 onClick={logoutUser}>Đăng xuất</h2>
         </MenuItem>
       </Menu>
       ;

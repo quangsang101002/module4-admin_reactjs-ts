@@ -10,7 +10,7 @@ import "../../components/GlobalStyles/globalSTyleTable/StyleTable.scss";
 import { IoMdAddCircle } from "react-icons/io";
 import PaginationAdmin from "../../components/table/Pagination";
 import { Product } from "./ProductsInterFace";
-
+import { useNavigate } from "react-router-dom";
 function ProductList() {
   const [displayProduct, setDisplayProduct] = useState<Product[]>([]);
   const [search, setSearch] = useState<string>("");
@@ -18,7 +18,7 @@ function ProductList() {
   const [idCheck, setIdCheck] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalProduct, setTotalProduct] = useState<number>(0);
-  console.log(idCheck);
+  const navigate = useNavigate();
 
   useEffect(() => {
     searchProducts();
@@ -35,10 +35,11 @@ function ProductList() {
         setDisplayProduct(response.result.recount);
         setTotalProduct(response.result.totalProduct);
       } else {
-        alert("Invalid response format");
+        // navigate("/login");
       }
     } catch (err) {
-      alert(err);
+      console.log(err);
+      // navigate("/login");
     }
   };
 
@@ -81,6 +82,8 @@ function ProductList() {
       await setProduct(!isProduct);
     } catch (error) {
       console.log(error);
+
+      navigate("/login");
     }
   };
 

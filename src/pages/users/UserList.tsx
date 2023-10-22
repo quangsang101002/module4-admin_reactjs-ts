@@ -11,6 +11,7 @@ import { IoMdAddCircle } from "react-icons/io";
 import { User } from "../../../src/apis/GlobleIterface/GlobleInterFace";
 import PaginationAdmin from "../../components/table/Pagination";
 import PageNotFound from "../../components/errors/PageNotFound";
+import { useNavigate } from "react-router-dom";
 function UserList() {
   const [displayProduct, setDisplayProduct] = useState<User[]>([]);
   const [search, setSeach] = useState<string>("");
@@ -19,7 +20,7 @@ function UserList() {
   const [isChange, setIsChange] = useState<boolean>(false);
   const [idUser, setIdUser] = useState<number[]>([]);
 
-  console.log("isChange", isChange);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDataProduct();
@@ -39,7 +40,7 @@ function UserList() {
         alert("Invalid response format");
       }
     } catch (err) {
-      alert(err);
+      navigate("/login");
     }
   };
 

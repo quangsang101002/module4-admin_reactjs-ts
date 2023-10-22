@@ -9,6 +9,7 @@ import "../../components/GlobalStyles/globalSTyleTable/StyleTable.scss";
 import { IoMdAddCircle } from "react-icons/io";
 import PaginationAdmin from "../../components/table/Pagination";
 import { Order } from "../../../src/apis/GlobleIterface/GlobleInterFace";
+import { useNavigate } from "react-router-dom";
 function OrderList() {
   const [displayProduct, setDisplayProduct] = useState<Order[]>([]);
   const [search, setSeach] = useState<string>("");
@@ -17,6 +18,7 @@ function OrderList() {
   const [isChange, setIsChange] = useState<boolean>(false);
   const [idUser, setIdUser] = useState<number[]>([]);
   const [changeColor, setChangeColor] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDataUser();
@@ -40,7 +42,9 @@ function OrderList() {
         alert("Invalid response format");
       }
     } catch (err) {
-      alert(err);
+      console.log(err);
+
+      navigate("/login");
     }
   };
 
