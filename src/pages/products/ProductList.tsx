@@ -99,7 +99,7 @@ function ProductList() {
             placeholder="Search..."
             onChange={searchProduct}
           ></input>
-          <small className={Styles.search}>
+          <small className="search">
             <IoIosSearch />
           </small>
         </div>

@@ -2,8 +2,25 @@ import React from "react";
 import styles from "./Header.module.scss";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosSearch } from "react-icons/io";
-
+import authAPI from "../../apis/auth/auth/requests/author.api";
+import { useState, useEffect } from "react";
 function Header() {
+  const [avatar, setAvatar] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await authAPI.getAuth();
+      setAvatar(response.avatar);
+      setUsername(response.username);
+      setUserId(response.id);
+    } catch (error) {}
+  };
   return (
     <header className={styles.wrapper}>
       <div className={styles.menu}>
@@ -17,7 +34,7 @@ function Header() {
             alt="avatar"
           ></img>
         </div>
-        <div className={styles.user}>Huấn Hoa Hồng</div>
+        <div className={styles.user}>{username}</div>
       </div>
     </header>
   );

@@ -37,7 +37,7 @@ function OrderList() {
       const response = await OrderAPI.SearchOrder(search, 7, currentPage);
       if (response) {
         setDisplayProduct(response.result.recount);
-        setTotalProduct(response.result.total);
+        setTotalProduct(response.result.totalOrders);
       } else {
         alert("Invalid response format");
       }

@@ -59,6 +59,8 @@ const logout = async () => {
         console.error(error);
         throw error;
       });
+  } else {
+    return Promise.reject("Access token is null.");
   }
 };
 const authAPI = {
