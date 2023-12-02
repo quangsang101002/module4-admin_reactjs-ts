@@ -2,14 +2,12 @@ import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { Router } from "@remix-run/router";
 
 import DefaultLayout from "../layouts/DefaultLayout";
-// import DefaultLayout from "../layouts/DefaultLayout";
 
 import DashboardPage from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
 import ProductList from "../pages/products/ProductList";
 import UserList from "../pages/users/UserList";
 import OrderList from "../pages/orders/OrderList";
-import Header from "../components/partials/Header";
 import ProductAdd from "../pages/products/productActions/productAdd/ProductAdd";
 import ProductEdit from "../pages/products/productActions/productEdit/ProductEdit";
 import UserAdd from "../pages/users/userAdd/UserAdd";
